@@ -78,6 +78,7 @@ export const schema = gql`
     twilioMessageServiceSid: String
     fullyConfigured: Boolean
     vanEnabled: Boolean!
+    emailEnabled: Boolean
     phoneInventoryEnabled: Boolean!
     campaignPhoneNumbersEnabled: Boolean!
     pendingPhoneNumberJobs: [BuyPhoneNumbersJobRequest]

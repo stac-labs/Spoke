@@ -214,7 +214,7 @@ export const resolvers = {
       (organization.features &&
       organization.features.indexOf("opt_out_message") !== -1
         ? JSON.parse(organization.features).opt_out_message
-        : process.env.OPT_OUT_MESSAGE) ||
+        : getConfig("OPT_OUT_MESSAGE")) ||
       "I'm opting you out of texts immediately. Have a great day.",
     textingHoursStart: organization => organization.texting_hours_start,
     textingHoursEnd: organization => organization.texting_hours_end,
@@ -309,6 +309,11 @@ export const resolvers = {
         }).includes('ngpvan')
       );
     },
+    emailEnabled: async (organization, _, { user }) => {
+      await accessRequired(user, organization.id, "SUPERVOLUNTEER", true);
+      return Boolean(getConfig("EMAIL_HOST", organization)
+      );
+    },
     phoneInventoryEnabled: async (organization, _, { user }) => {
       await accessRequired(user, organization.id, "SUPERVOLUNTEER", true);
       return (
@@ -348,13 +353,11 @@ export const resolvers = {
       return configured;
     },
     pendingPhoneNumberJobs: async (organization, _, { user }) => {
-      await accessRequired(user, organization.id, "OWNER", true);
+      await accessRequired(user, organization.id, "ADMIN", true);
       const jobs = await r
         .knex("job_request")
-        .where({
-          job_type: "buy_phone_numbers",
-          organization_id: organization.id
-        })
+        .whereIn("job_type", ["buy_phone_numbers", "delete_phone_numbers"])
+        .andWhere("organization_id", organization.id)
         .orderBy("updated_at", "desc");
       return jobs.map(j => {
         const payload = JSON.parse(j.payload);
@@ -364,7 +367,7 @@ export const resolvers = {
           status: j.status,
           resultMessage: j.result_message,
           areaCode: payload.areaCode,
-          limit: payload.limit
+          limit: payload.limit || 0
         };
       });
     },

@@ -1,8 +1,120 @@
 # Release Notes
 
+## v10.0
+
+_January 2021:_ Version 10.0
+
+### Post-election and License Change
+
+This is the first release since after the Nov 2020 election. Spoke was used by more than 500 organizations sending millions of text messages over the year. It was used in everything from Movement for Black Lives, to local volunteer-run groups, to senatorial races. In the primaries it was used by at least four presidential candidates.  This is a testament to the community that has built up here around progressive organizing.
+
+Spoke is just one example of campaign and organizing software, and it's worth noting that open-source doesn't have to work on just one project -- open-source, or rather collaborative source, where organizations and volunteers believing in economic and racial justice can also collaborate around the code that helps run our organizations and communicate to our allies -- collaborative source is Organizing in code.
+
+One thing we are doing to keep our community working closely together is changing our license. The previous license was "MIT" and did not have any restrictions on distribution. After many community discussions and universal consensus, we are moving to the GPL3 with a "share-alike" license requirement, meaning that to use our software, you have an obligation to share back improvements you've made with others. Interest in this requirement especially came from a growing ecosystem of Spoke commercial hosters, which are contributing to the community, but want to compete and differentiate themselves while fearlessly sharing their code back to the larger community, so everyone can benefit from progressive innovation each cycle.
+
+We also wanted to embed our community's values in the license and in the Spoke application itself. It's not easy to distill progressive values into something short and sweet, and we do not claim to have done so. Nonetheless, we wanted to create a statement that should be a baseline for everyone in our community and I look forward to embedding more quotes from progressive leaders and in our documentation going forward.
+
+The universally agreed statement to include in a few places where texters can see it and is required to be preserved by our new license terms is:
+
+> Spoke is developed and maintained by people committed to fighting oppressive systems and structures, including economic injustice, racism, patriarchy, and militarism.
+
+### Migration Notes
+
+As usual, we try to avoid as much backwards incompatibility as possible -- people still successfully upgrade from very old releases and we will continue that community commitment so it's always as easy as possible to upgrade and stay up-to-date.
+
+* This is a major release and includes a schema change. This is a minor schema change, which you can run before/during migration (either by leaving/disabling SUPPRESS_MIGRATIONS="" or for [AWS Lambda, see the db migration instructions](./HOWTO_DEPLOYING_AWS_LAMBDA.md#migrating-the-database). It includes adding a nullable "media" column to the message table, and adds a new table, "assignment_feedback"
+* Some timezone bugs were resolved, but part of the issue was found during an upgrade that we had incorrect defaults for the timezone -- if you have settings for either environment variable DST_REFERENCE_TIMEZONE or DEFAULT_TZ if it was e.g. ~"America/New_York"~ then you should change it to `US/Eastern` -- please lookup and adjust other timezones as appropriate. If you did not have these variables set, then you should keep them blank -- note that not including a DEFAULT_TZ (or TZ) will default to texting hours that most conservatively work for the continental US (12pm ET - 9pm ET)
+
+### Major Improvements
+
+As the first release post-election, this mostly gathered together fixes and improvements that were made in the run-up to the election. While last year was a very active year, we have quite a bit planned for this year, as well.
+
+  * Media responses: Texters can now see if there is a media (image/video/audio) response from a contact and click to open and see it. While this can be useful, media responses often include offensive content from hostile responses and can affect texters. Thus we also include a [hide-media](./HOWTO-use-texter-sideboxes.md#hide-media) Texter Sidebox option you can enable organization-wide and/or set whether texters can see media per-campaign.
+  * Texter Feedback setup: If you add [texter-feedback](./HOWTO-use-texter-sideboxes.md#texter-feedback) to TEXTER_SIDEBOXES, when Admins click to 'review' a texter's campaign conversations, the admin can provide feedback on a number of axes -- this is great for training up new texters.
+  * Cypress test suite - additional tests to make sure bugs don't show up in our user-interface were added and organized. We hope to expand these in the future.
+  * Message Review: Unassigning -- it's been possible to assign conversations, but sometimes it's also useful to *unassign* conversations. This is especially useful when complemented with [vetted-takeconversations](./HOWTO-use-texter-sideboxes#take-conversations) Dynamic Assignment batch handler.
+  * Phone number inventory: Numbers are now deleteable
+  * Mobilize Event Shift texter sidebox: for integrations with [Mobilize](https://www.mobilize.us/)  (needs enabling by setting some environment variables documented in the code and adding it to TEXTER_SIDEBOXES environment variable)
+  * Canned Response search -- for larger lists of canned responses and survey responses, there's now a search bar on top for texters to narrow the list.
+  * Re-orderable interaction steps
+
+## Bugfixes and Minor featuers
+
+See links and notes from the [10.0 pull request](https://github.com/MoveOnOrg/Spoke/pull/1900) for a list of all changes that were included.
+
+### Appreciations
+
+* [agreenspan24](https://github.com/agreenspan24), [asalant](https://github.com/asalant), [codygordon](https://github.com/codygordon), [ibrand](https://github.com/ibrand), [inorvig](https://github.com/inorvig), [jeffm2001](https://github.com/jeffm2001), [JeremyParker](https://github.com/JeremyParker), [lperson](https://github.com/lperson), [matteosb](https://github.com/matteosb), [mayefsky](https://github.com/mayefsky), [navinsivakumar](https://github.com/navinsivakumar), [oburbank](https://github.com/oburbank), [schuyler1d](https://github.com/schuyler1d)
+* Mark Houghton and [Arena Reed](https://github.com/arena) for QA and design help
+* Everyone that worked to make positive change this past year!
+
+
+## v9.2
+
+_September 2020:_ Version 9.2
+
+### Spoke Project Status Update
+
+As we are getting closer to the 2020 election, MoveOn is 'code-freezing' changes on our production instance.
+We believe campaigns and Spoke hosters would be well-advised to do the same and aim for stability over this time.
+The only releases before November 3rd, 2020 will be for security updates.
+
+We will also continue to merge additions to documentation and integration test PRs directly into our `main` branch.
+
+That said, other hosters and developers are continuing to make bug fixes and add important features for their
+own texting programs.  Normally, MoveOn's release process involves first gathering a release candidate, then
+running QA on the changes, and finally running it in production for a day or two to shake out any bugs missed
+during QA and review and to evaluate the release 'at scale'.  Without this final step, we can't make a strong commitment
+to release readiness.
+
+However, we want to track these improvements, so we will be maintaining two 'experimental' PRs -- one more conservative
+with small changes and mostly bug fixes: [stage-main-postelection2020-stable](https://github.com/MoveOnOrg/Spoke/pull/1830).
+The other with larger changes but riskier to deploy before the election: [stage-main-postelection2020-unstable](https://github.com/MoveOnOrg/Spoke/pull/1831).  If a hosting partner steps up to
+run one of these at any time and affirms its stability, we will mark that.  Additionally, in the conservative PR,
+we will link to specific PRs that if you run into a particular bug in production you can cherry-pick that PR to fix that issue.
+
+After the election, I'm sure there will be a lot of changes and diverged branches from different organizations.
+We will be here to try to gather those changes, but we'd like to note that will be significant work and can't happen
+without those organizations also making an effort to separate their 'hacks' to make something work vs. changes that
+will be maintainable and support the long-term architecture and stability of Spoke for the community.  We recommend
+whenever possible, opening a PR on specific small changes -- these are more likely to be mergeable after the election.
+If that's not possible due to time/development constraints, we ask that you at least open a 'organization dev' PR that
+just includes all your changes -- then post-election we can at least sort out the features and the community can
+have a place to see what was done.
+
+I'd like to take a moment to celebrate this amazing community -- so many progressive orgs and campaigns are using Spoke and
+contributing back to it -- along with a cadre of committed volunteer developers, designers and texters.  Good luck
+with all your campaigns -- let's win!
+
+### New Features/Improvements
+
+- Throughout the admin on the People page, Message Review, and Campaign stats, there are little links to the texter's
+  own Todos page view. This can be useful for admins to see what campaigns a texter is part of and debug any
+  issues where seeing the texter view can help.
+- Experimental DB_READONLY_HOST variable which can connect to a replica/read-only instance for some specific queries.
+  In the event of high database stress, setting this may help relieve IO on the 'writer' database instance.
+
+### Bug Fixes
+
+- Fixed a regression in 9.1 where /twilio-message-report Twilio validation would fail if TWILIO_MULTI_ORG=1 but
+  TWILIO_MESSAGE_CALLBACK_URL was NOT set.  We reverted that behavior, but recommend that you update your
+  twilio config to `/twilio-message-report/<org id>` in this configuration and then set TWILIO_VALIDATION=1
+- Fixed a but in 9.1 on the superadmin organizations page where creating an organization did not work.
+- Fixed two minor security issues to restrict post-login redirect and hide errors on the front-end by-default.
+  If you want to re-enable errors on the front-end, set SHOW_SERVER_ERROR=1
+- Fixed issue with Release Contacts texter sidebox where clicking "Done for the day" would not give feedback on
+  the todos screen -- it now clears the 'send first messages' and 'replies' buttons where appropriate.
+
+### Appreciations
+
+Thanks to [jeffm2001](https://github.com/jeffm2001) and [schuyler1d](https://github/schuyler1d)
+
 ## v9.1
 
 _September 2020:_ Version 9.1
+
+* Regression notice: When TWILIO_MULTI_ORG=1 is set but TWILIO_MESSAGE_CALLBACK_URL is not, /twilio-message-report
+  fails.  There is a [fix](https://github.com/MoveOnOrg/Spoke/pull/1826) that is also available in 9.2 (above).
 
 ### New Features/Improvements
 - **New UI for adding organizations to your instance:** There is now a page only accessible for users with `is_superadmin` set for adding orgs in a Spoke instance. You can access this screen through the user menu under "superadmin tools." We've gated this feature to only users with that privilege to keep any roles you already have on your instances from suddenly gaining the ability to add orgs. You can only change a user's `is_superadmin` status with a direct DB query at this time. *The first user on new instances will be a superadmin by default now*
@@ -30,7 +142,7 @@ Thanks to [lperson](https://github/lperson), [bdatkins](https://github/bdatkins)
 
 _August 2020:_ Version 9.0
 
-This is a major release and therefore requires a schema change. This is a minor schema change, which you can run before/during migration (either by leaving/disabling SUPPRESS_MIGRATIONS="" or for [AWS Lambda, see the db migration instructions](DEPLOYING_AWS_LAMBDA.md#migrating-the-database)
+This is a major release and therefore requires a schema change. This is a minor schema change, which you can run before/during migration (either by leaving/disabling SUPPRESS_MIGRATIONS="" or for [AWS Lambda, see the db migration instructions](HOWTO_DEPLOYING_AWS_LAMBDA.md#migrating-the-database)
 
 We just (stealth) released 8.1 -- why the quick second release? Well, we deployed 8.1 at MoveOn on production and it was doing great for two days. On the third day there was a final set of tweaks and thus we cut the release for 8.1 on Wednesday 8/26. Well, Murphy's law -- two hours after we finished up the release we started hitting production issues. We have not yet scaled up for our "hockeystick" (where the participation graph looks like a hockey stick and surges) period and to prepare @schuyler1d asked the campaigners to "try to break Spoke this week." The team sent 1 million messages with 70K sent in a 5 minute period and our database started failing.
 
@@ -44,7 +156,7 @@ But because of the timing it was ambiguous whether we 'just' hit scaling issues 
 - Drastically improves the query efficiency for the Texter Todos page
 - Removes some liability of thrashing with auto-optout updating.
 
-## 8.1 Highlights
+### 8.1 Highlights
 8.1 still makes up the bulk of 9.0's featureset, so here's what to look out for and check out the [8.1 section](RELEASE_NOTES.md#v81) for the full list of awesome changes
 
 - **Tagging:** The tags feature is no longer experimental! This release includes a few adjustments to tags that finish the tagging story:
@@ -56,7 +168,7 @@ But because of the timing it was ambiguous whether we 'just' hit scaling issues 
 - [Documentation now exists for all of the extensions!](HOWTO-extend-spoke.md)
 
 ### Appreciations
-Thanks for quick and impactful work from [schuyler1d](https://github/schuyler1d) to get 8.1 to a better more stable 9.0! Thank you so much to the **11** community contributors that made all the features and bug fixes possible: [inorvig](https://github/inorvig), [oburbank](https://github/oburbank), [aschneit](https://github/aschneit), [jeffm2001](https://github/jeffm2001), [lperson](https://github/lperson), [ibrand](https://github/ibrand), [bdatkins](https://github/bdatkins), [JeremyParker](https://github/JeremyParker), [tekkamanendless ](https://github/tekkamanendless), [sharonsolomon](https://github/sharonsolomon), [nke5ka](https://github/nke5ka)
+Thanks for quick and impactful work from [schuyler1d](https://github.com/schuyler1d) to get 8.1 to a better more stable 9.0! Thank you so much to the **11** community contributors that made all the features and bug fixes possible: [inorvig](https://github.com/inorvig), [oburbank](https://github.com/oburbank), [aschneit](https://github.com/aschneit), [jeffm2001](https://github.com/jeffm2001), [lperson](https://github.com/lperson), [ibrand](https://github.com/ibrand), [bdatkins](https://github.com/bdatkins), [JeremyParker](https://github.com/JeremyParker), [tekkamanendless ](https://github.com/tekkamanendless), [sharonsolomon](https://github.com/sharonsolomon), [nke5ka](https://github.com/nke5ka)
 
 ## v8.1
 
@@ -93,7 +205,7 @@ number outside of your "Geo-Permissions" settings
 
 ### Appreciations
 
-Thanks to [inorvig](https://github/inorvig), [oburbank](https://github/oburbank), [aschneit](https://github/aschneit), [jeffm2001](https://github/jeffm2001), [lperson](https://github/lperson), [ibrand](https://github/ibrand), [bdatkins](https://github/bdatkins), [JeremyParker](https://github/JeremyParker), [tekkamanendless ](https://github/tekkamanendless), [sharonsolomon](https://github/sharonsolomon), [nke5ka](https://github/nke5ka) and [schuyler1d](https://github/schuyler1d)
+Thanks to [inorvig](https://github.com/inorvig), [oburbank](https://github.com/oburbank), [aschneit](https://github.com/aschneit), [jeffm2001](https://github.com/jeffm2001), [lperson](https://github.com/lperson), [ibrand](https://github.com/ibrand), [bdatkins](https://github.com/bdatkins), [JeremyParker](https://github.com/JeremyParker), [tekkamanendless ](https://github.com/tekkamanendless), [sharonsolomon](https://github.com/sharonsolomon), [nke5ka](https://github.com/nke5ka) and [schuyler1d](https://github.com/schuyler1d)
 
 ## v8.0
 
@@ -115,7 +227,7 @@ This is a major release and therefore requires a schema change which you can run
 - There is a small migration to the `campaign` table which needs to be run before/during migration (either by leaving/disabling SUPPRESS_MIGRATIONS="" or for [AWS Lambda, see the db migration instructions](https://github.com/MoveOnOrg/Spoke/blob/main/docs/DEPLOYING_AWS_LAMBDA.md#migrating-the-database)
 
 ### New Features/Improvements
-- Use of Spoke is subject to legal restrictions which each organization should review and understand, including recent guidance from an FCC ruling. Spoke 8.0 has several changes related to this guidance and we recommend system administrators review the settings outlined [here](https://github.com/MoveOnOrg/Spoke/blob/main/docs/REFERENCE-best-practices-conformance-messaging.md) along with consulting your own legal advice.
+- Use of Spoke is subject to legal restrictions which each organization should review and understand, including recent guidance from an FCC ruling. We recommend system administrators review the settings outlined [here](https://github.com/MoveOnOrg/Spoke/blob/main/docs/REFERENCE-best-practices-conformance-messaging.md) along with consulting your own legal advice.
 - **_Experimental_ Phone number management for campaigns**: A much requested feature for scaling past the 400 phone numbers limit.
   - turn this on with `EXPERIMENTAL_CAMPAIGN_NUMBERS`
 - **_Experimental_ Release Texts**: Dynamic Assignment will also include a way for texters to release texts! That way when a texter is done for the day they can release texts without admin needing to go in and reassign them.
@@ -141,7 +253,7 @@ This is a major release and therefore requires a schema change which you can run
 
 ### Appreciations
 
-Thanks to [jasterix](https://github/jasterix), [ibrand](https://github/ibrand), [jeffm2001](https://github/jeffm2001), [lperson](https://github/lperson), [matteosb](https://github/matteosb), [tekkamanendless ](https://github/tekkamanendless), and [schuyler1d](https://github/schuyler1d)
+Thanks to [jasterix](https://github.com/jasterix), [ibrand](https://github.com/ibrand), [jeffm2001](https://github.com/jeffm2001), [lperson](https://github.com/lperson), [matteosb](https://github.com/matteosb), [tekkamanendless ](https://github.com/tekkamanendless), and [schuyler1d](https://github.com/schuyler1d)
 
 ## v7.1
 
@@ -177,7 +289,7 @@ _July 2020:_ Release 7.1 is a testament to the community working together -- sev
 
 ### Appreciations
 
-Thanks to [alliejones](https://github/alliejones), [aschneit](https://github/aschneit), [eamouzou](https://github/eamouzou), [hiemanshu](https://github/hiemanshu), [ibrand](https://github/ibrand), [jeffm2001](https://github/jeffm2001), [JeremyParker](https://github/JeremyParker), [lperson](https://github/lperson), [matteosb](https://github/matteosb), and [schuyler1d](https://github/schuyler1d).
+Thanks to [alliejones](https://github.com/alliejones), [aschneit](https://github.com/aschneit), [eamouzou](https://github.com/eamouzou), [hiemanshu](https://github.com/hiemanshu), [ibrand](https://github.com/ibrand), [jeffm2001](https://github.com/jeffm2001), [JeremyParker](https://github.com/JeremyParker), [lperson](https://github.com/lperson), [matteosb](https://github.com/matteosb), and [schuyler1d](https://github.com/schuyler1d).
 
 Also to AFL-CIO, MoveOn, NYCET, Scale to Win, and Working Families Party for sending their contributions and giving early feedback/debugging time.
 
