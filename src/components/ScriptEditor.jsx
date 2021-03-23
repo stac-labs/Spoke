@@ -18,7 +18,8 @@ const styles = {
     border: "1px solid #ddd",
     cursor: "text",
     fontSize: 16,
-    padding: 5
+    padding: 5,
+    marginBottom: 10
   },
   button: {
     marginTop: 10,
@@ -43,7 +44,9 @@ const styles = {
   },
   scriptFieldButtonSection: {
     marginTop: 10,
-    padding: 5
+    padding: 5,
+    maxHeight: "600px",
+    overflowY: "auto"
   }
 };
 
@@ -231,7 +234,6 @@ class ScriptEditor extends React.Component {
             spellCheck
           />
         </div>
-        {this.renderCustomFields()}
         <div>
           Estimated{" "}
           <Link
@@ -247,6 +249,7 @@ class ScriptEditor extends React.Component {
             segmentInfo.charCount}
           <br />
         </div>
+        {this.renderCustomFields()}
       </div>
     );
   }
