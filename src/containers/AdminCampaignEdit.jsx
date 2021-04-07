@@ -57,15 +57,14 @@ const campaignInfoFragment = `
     sideboxChoices
   }
   timezone
-  texters {
-    id
-    firstName
-    lastName
-    assignment(campaignId:$campaignId) {
-      contactsCount
-      needsMessageCount: contactsCount(contactsFilter:{messageStatus:\"needsMessage\"})
-      maxContacts
+  assignments(assignmentsFilter: {stats: true}) {
+    texter {
+      id
+      firstName
+      lastName
     }
+    contactsCount
+    needsMessageCount: contactsCount(contactsFilter:{messageStatus:\"needsMessage\"})
   }
   interactionSteps {
     id
@@ -328,18 +327,25 @@ export class AdminCampaignEdit extends React.Component {
       // Transform the campaign into an input understood by the server
       delete newCampaign.customFields;
       delete newCampaign.contactsCount;
-      if (newCampaign.hasOwnProperty("texters")) {
-        newCampaign.texters = newCampaign.texters.map(texter => ({
-          id: texter.id,
-          needsMessageCount: texter.assignment.needsMessageCount,
-          maxContacts: texter.assignment.maxContacts,
-          contactsCount: texter.assignment.contactsCount
+      console.log("New Assigments - AdminCampaignEdit");
+      console.log(newCampaign);
+      if (
+        newCampaign.hasOwnProperty("assignments") &&
+        newCampaign.assignments.hasOwnProperty("texter")
+      ) {
+        newCampaign.assignments = newCampaign.assignments.map(assignment => ({
+          texter: {
+            id: assignment.texter.id
+          },
+          needsMessageCount: assignment.needsMessageCount,
+          maxContacts: assignment.maxContacts,
+          contactsCount: assignment.contactsCount
         }));
       }
       if (newCampaign.hasOwnProperty("interactionSteps")) {
         newCampaign.interactionSteps = makeTree(newCampaign.interactionSteps);
       }
-
+      console.log(newCampaign);
       await this.props.mutations.editCampaign(
         this.props.campaignData.campaign.id,
         newCampaign
@@ -428,11 +434,11 @@ export class AdminCampaignEdit extends React.Component {
       {
         title: "Texters",
         content: CampaignTextersForm,
-        keys: ["texters", "contactsCount"],
+        keys: ["assignments", "contactsCount"],
         checkCompleted: () =>
-          (this.state.campaignFormValues.texters.length > 0 &&
+          (this.state.campaignFormValues.assignments.length > 0 &&
             this.state.campaignFormValues.contactsCount ===
-              this.state.campaignFormValues.texters.reduce(
+              this.state.campaignFormValues.assignments.reduce(
                 (left, right) => left + right.assignment.contactsCount,
                 0
               )) ||
@@ -441,7 +447,7 @@ export class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: true,
         extraProps: {
-          orgTexters: this.props.organizationData.organization.texters,
+          orgAssignments: this.props.organizationData.organization.assignments,
           organizationUuid: this.props.organizationData.organization.uuid,
           useDynamicAssignment: this.props.campaignData.campaign
             .useDynamicAssignment,
