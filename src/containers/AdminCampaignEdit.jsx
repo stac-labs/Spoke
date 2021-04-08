@@ -439,7 +439,7 @@ export class AdminCampaignEdit extends React.Component {
           (this.state.campaignFormValues.assignments.length > 0 &&
             this.state.campaignFormValues.contactsCount ===
               this.state.campaignFormValues.assignments.reduce(
-                (left, right) => left + right.assignment.contactsCount,
+                (left, right) => left + right.contactsCount,
                 0
               )) ||
           this.state.campaignFormValues.useDynamicAssignment === true,
@@ -447,7 +447,7 @@ export class AdminCampaignEdit extends React.Component {
         expandAfterCampaignStarts: true,
         expandableBySuperVolunteers: true,
         extraProps: {
-          orgAssignments: this.props.organizationData.organization.assignments,
+          orgTexters: this.props.organizationData.organization.texters,
           organizationUuid: this.props.organizationData.organization.uuid,
           useDynamicAssignment: this.props.campaignData.campaign
             .useDynamicAssignment,
