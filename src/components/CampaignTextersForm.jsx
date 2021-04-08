@@ -244,12 +244,14 @@ export default class CampaignTextersForm extends React.Component {
   };
 
   formSchema = yup.object({
-    texters: yup.array().of(
+    assignments: yup.array().of(
       yup.object({
-        id: yup.string(),
-        assignment: yup.object({
-          needsMessageCount: yup.string(),
-          maxContacts: yup.string().nullable()
+        needsMessageCount: yup.string(),
+        maxContacts: yup.string().nullable(),
+        texter: yup.object({
+          id: yup.string(),
+          firstName: yup.string(),
+          lastName: yup.string()
         })
       })
     )
@@ -376,7 +378,7 @@ export default class CampaignTextersForm extends React.Component {
               {...dataTest("texterAssignment")}
               name={`assignments[${index}].needsMessageCount`}
               mapToValue={m =>
-                m.texters.find(t => t.id === assignment.texter.id)
+                m.assignments.find(t => t.texter.id === assignment.texter.id)
                   .needsMessageCount
               }
               hintText="Contacts"
