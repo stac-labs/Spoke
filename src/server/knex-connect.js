@@ -14,7 +14,7 @@ const {
   DB_PASSWORD,
   DB_USER,
   DB_SCHEMA,
-  DB_DEBUG = "true",
+  DB_DEBUG = "false",
   DATABASE_URL,
   NODE_ENV
 } = process.env;

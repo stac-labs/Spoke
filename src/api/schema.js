@@ -66,6 +66,7 @@ const rootSchema = gql`
     needsMessageCount: Int
     maxContacts: Int
     contactsCount: Int
+    messagedCount: Int
   }
 
   input CampaignInput {
