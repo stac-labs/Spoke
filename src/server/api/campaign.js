@@ -477,7 +477,7 @@ export const resolvers = {
           query = query
             .join("user", "user.id", "assignment.user_id")
             .join("user_organization", "user_organization.user_id", "user.id")
-            .join(
+            .leftJoin(
               "campaign_contact",
               "campaign_contact.assignment_id",
               "assignment.id"
@@ -492,8 +492,7 @@ export const resolvers = {
               ),
               r.knex.raw("COUNT(*) as contacts_count")
             )
-            .groupBy(...fields)
-            .havingRaw("count(*) > 0");
+            .groupBy(...fields);
         }
       }
       return (await query).map(a => ({
