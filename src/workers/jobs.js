@@ -436,7 +436,8 @@ export async function assignTexters(job) {
   const cid = job.campaign_id;
   console.log("assignTexters1", cid, payload);
   const campaign = (await r.knex("campaign").where({ id: cid }))[0];
-  const texters = payload.texters;
+  const newAssignments = payload.assignments;
+
   const currentAssignments = await r
     .knex("assignment")
     .where("assignment.campaign_id", cid)
@@ -456,59 +457,63 @@ export async function assignTexters(job) {
     )
     .catch(log.error);
 
-  const unchangedTexters = {}; // max_contacts and needsMessageCount unchanged
-  const demotedTexters = {}; // needsMessageCount reduced
+  const unchangedAssignments = {}; // max_contacts and needsMessageCount unchanged
+  const demotedAssignments = {}; // needsMessageCount reduced
   const dynamic = campaign.use_dynamic_assignment;
   // detect changed assignments
   currentAssignments
-    .map(assignment => {
-      const texter = texters.filter(
-        texter => parseInt(texter.id, 10) === assignment.user_id
+    .map(currentAssignment => {
+      const newAssignment = newAssignments.filter(
+        newAssignment =>
+          parseInt(newAssignment.texter.id, 10) === currentAssignment.user_id
       )[0];
-      if (texter) {
+      if (newAssignment) {
         const unchangedMaxContacts =
-          parseInt(texter.maxContacts, 10) === assignment.max_contacts || // integer = integer
-          texter.maxContacts === assignment.max_contacts; // null = null
+          parseInt(newAssignment.maxContacts, 10) ===
+            currentAssignment.max_contacts || // integer = integer
+          newAssignment.maxContacts === currentAssignment.max_contacts; // null = null
         const unchangedNeedsMessageCount =
-          texter.needsMessageCount ===
-          parseInt(assignment.needs_message_count, 10);
+          newAssignment.needsMessageCount ===
+          parseInt(currentAssignment.needs_message_count, 10);
         if (
           (!dynamic && unchangedNeedsMessageCount) ||
           (dynamic && unchangedMaxContacts)
         ) {
-          unchangedTexters[assignment.user_id] = true;
+          unchangedAssignments[currentAssignment.user_id] = true;
           return null;
         } else if (!dynamic) {
           // standard assignment change
           // If there is a delta between client and server, then accommodate delta (See #322)
           const clientMessagedCount =
-            texter.contactsCount - texter.needsMessageCount;
+            newAssignment.contactsCount - newAssignment.needsMessageCount;
           const serverMessagedCount =
-            assignment.full_contact_count - assignment.needs_message_count;
+            currentAssignment.full_contact_count -
+            currentAssignment.needs_message_count;
 
           const numDifferent =
-            (texter.needsMessageCount || 0) -
-            assignment.needs_message_count -
+            (newAssignment.needsMessageCount || 0) -
+            currentAssignment.needs_message_count -
             Math.max(0, serverMessagedCount - clientMessagedCount);
 
           if (numDifferent < 0) {
             // got less than before
-            demotedTexters[assignment.id] = -numDifferent;
+            demotedAssignments[currentAssignment.id] = -numDifferent;
           } else {
             // got more than before: assign the difference
-            texter.needsMessageCount = numDifferent;
+            newAssignment.needsMessageCount = numDifferent;
           }
         }
-        return assignment;
+        return currentAssignment;
       } else {
         // deleted texter
-        demotedTexters[assignment.id] = assignment.needs_message_count;
-        return assignment;
+        demotedAssignments[currentAssignment.id] =
+          currentAssignment.needs_message_count;
+        return currentAssignment;
       }
     })
     .filter(ele => ele !== null);
 
-  for (const assignId in demotedTexters) {
+  for (const assignId in demotedAssignments) {
     // Here we unassign ALL the demotedTexters contacts (not just the demotion count)
     // because they will get reapportioned below
     await r
@@ -525,7 +530,6 @@ export async function assignTexters(job) {
       .update({ assignment_id: null })
       .catch(log.error);
   }
-
   await updateJob(job, 20);
 
   let availableContacts = await r
@@ -534,29 +538,32 @@ export async function assignTexters(job) {
     .filter({ campaign_id: cid })
     .count();
   // Go through all the submitted texters and create assignments
-  const texterCount = texters.length;
+  const newAssignmentCount = newAssignments.length;
 
-  for (let index = 0; index < texterCount; index++) {
-    const texter = texters[index];
-    const texterId = parseInt(texter.id, 10);
+  for (let index = 0; index < newAssignmentCount; index++) {
+    const newAssignment = newAssignments[index];
+    const texterId = parseInt(newAssignment.texter.id, 10);
     let maxContacts = null; // no limit
 
-    if (texter.maxContacts || texter.maxContacts === 0) {
+    if (newAssignment.maxContacts || newAssignment.maxContacts === 0) {
       maxContacts = Math.min(
-        parseInt(texter.maxContacts, 10),
-        parseInt(process.env.MAX_CONTACTS_PER_TEXTER || texter.maxContacts, 10)
+        parseInt(newAssignment.maxContacts, 10),
+        parseInt(
+          process.env.MAX_CONTACTS_PER_TEXTER || newAssignment.maxContacts,
+          10
+        )
       );
     } else if (process.env.MAX_CONTACTS_PER_TEXTER) {
       maxContacts = parseInt(process.env.MAX_CONTACTS_PER_TEXTER, 10);
     }
 
-    if (unchangedTexters[texterId]) {
+    if (unchangedAssignments[texterId]) {
       continue;
     }
 
     const contactsToAssign = Math.min(
       availableContacts,
-      texter.needsMessageCount
+      newAssignment.needsMessageCount
     );
 
     if (contactsToAssign === 0) {

@@ -288,7 +288,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
     }
   }
 
-  if (campaign.hasOwnProperty("texters")) {
+  if (campaign.hasOwnProperty("assignments")) {
     changed = true;
     await jobRunner.dispatchJob({
       queue_name: `${id}:edit_campaign`,
@@ -297,7 +297,7 @@ async function editCampaign(id, campaign, loaders, user, origCampaignRecord) {
       campaign_id: id,
       payload: JSON.stringify({
         id,
-        texters: campaign.texters
+        assignments: campaign.assignments
       })
     });
   }

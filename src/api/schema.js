@@ -56,7 +56,13 @@ const rootSchema = gql`
   }
 
   input TexterInput {
-    id: String
+    id: String!
+    firstName: String
+    lastName: String
+  }
+
+  input AssignmentInput {
+    texter: TexterInput!
     needsMessageCount: Int
     maxContacts: Int
     contactsCount: Int
@@ -77,7 +83,7 @@ const rootSchema = gql`
     ingestMethod: String
     contactData: String
     organizationId: String
-    texters: [TexterInput]
+    assignments: [AssignmentInput]
     interactionSteps: InteractionStepInput
     cannedResponses: [CannedResponseInput]
     useOwnMessagingService: Boolean
