@@ -626,7 +626,10 @@ export async function assignTexters(job) {
       }
     }
 
-    await updateJob(job, Math.floor((75 / texterCount) * (index + 1)) + 20);
+    await updateJob(
+      job,
+      Math.floor((75 / newAssignmentCount) * (index + 1)) + 20
+    );
   } // endfor
 
   if (!campaign.use_dynamic_assignment) {
