@@ -309,7 +309,7 @@ export default class CampaignTextersForm extends React.Component {
                 ...this.formValues().assignments,
                 {
                   texter: {
-                    id: newTexter.Id,
+                    id: newTexter.id,
                     firstName: newTexter.firstName
                   },
                   contactsCount: 0,
