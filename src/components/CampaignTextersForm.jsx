@@ -520,10 +520,7 @@ export default class CampaignTextersForm extends React.Component {
                         const newAssignments = this.formValues().assignments.map(
                           assignment => ({
                             ...assignment,
-                            texter: {
-                              ...assignment.texter,
-                              contactsCount
-                            }
+                            contactsCount
                           })
                         );
                         this.onChange({
